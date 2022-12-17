@@ -239,64 +239,65 @@ class PostPagesTests(TestCase):
                 self.assertNotIn(expected, form_field)
 
     def test_cache(self):
-        response = self.authorized_client.get(
-            reverse("posts:index"))
+        """Тест кеша"""
+        response = self.authorized_client.get(reverse("posts:index"))
         posts_old_content = response.content
         post_last = Post.objects.last()
         post_last.delete()
-        new_response = self.authorized_client.get(
-            reverse("posts:index"))
+        new_response = self.authorized_client.get(reverse("posts:index"))
         post_new_content = new_response.content
         cache.clear()
-        new_response1 = self.authorized_client.get(
-            reverse("posts:index"))
+        new_response1 = self.authorized_client.get(reverse("posts:index"))
         post_new_content1 = new_response1.content
         self.assertEqual(posts_old_content, post_new_content)
         self.assertNotEqual(post_new_content, post_new_content1)
 
     def test_404_template(self):
-        response = self.authorized_client.get('http://127.0.0.1:8000/404')
-        self.assertTemplateUsed(response, 'core/404.html')
+        """Проверяем что исрользуется кастомный шаблон 404"""
+        response = self.authorized_client.get("http://127.0.0.1:8000/404")
+        self.assertTemplateUsed(response, "core/404.html")
 
     def test_follow(self):
-        author_to_follow = User.objects.create_user(username='test_user')
+        """Тест подписки"""
+        author_to_follow = User.objects.create_user(username="test_user")
         before = Follow.objects.count()
-        response = self.authorized_client.get(reverse('posts:profile_follow',
-                                              args=[author_to_follow]))
+        response = self.authorized_client.get(
+            reverse("posts:profile_follow", args=[author_to_follow])
+        )
         self.assertEqual(before, Follow.objects.count() - 1)
-        last_follow = Follow.objects.latest('id')
+        last_follow = Follow.objects.latest("id")
         self.assertEqual(last_follow.user, self.user)
         self.assertEqual(last_follow.author, author_to_follow)
 
     def test_unfollow(self):
-        author_to_follow = User.objects.create_user(username='test_user')
-        Follow.objects.create(author=author_to_follow,user=self.user)
+        """Тест отписки"""
+        author_to_follow = User.objects.create_user(username="test_user")
+        Follow.objects.create(author=author_to_follow, user=self.user)
         before = Follow.objects.count()
-        response = self.authorized_client.get(reverse('posts:profile_unfollow',
-                                              args=[author_to_follow]))
+        response = self.authorized_client.get(
+            reverse("posts:profile_unfollow", args=[author_to_follow])
+        )
         self.assertEqual(before, Follow.objects.count() + 1)
 
-
     def test_follow_page_show_correct_context(self):
-        follow_user = User.objects.create_user(username='follow')
-        unfollow_user = User.objects.create_user(username='unfollow')
+        """Тест правильного отображения постов подписанных авторов"""
+        follow_user = User.objects.create_user(username="follow")
+        unfollow_user = User.objects.create_user(username="unfollow")
         follow_client = Client()
         follow_client.force_login(follow_user)
         unfollow_client = Client()
         unfollow_client.force_login(unfollow_user)
-        follow_client.get(reverse('posts:profile_follow', args=[self.user]))
-        response_follow = follow_client.get(reverse('posts:follow_index'))
-        response_unfollow = unfollow_client.get(reverse('posts:follow_index'))
-        follow_before = len(response_follow.context['page_obj'])
-        unfollow_before = len(response_unfollow.context['page_obj'])
-        Post.objects.create(author=self.user, text='text')
-        response_follow_after = follow_client.get(reverse('posts:follow_index'))
-        response_unfollow_after = unfollow_client.get(reverse('posts:follow_index'))
-        self.assertEqual(unfollow_before, len(response_unfollow_after.context['page_obj']))
-        self.assertEqual(follow_before + 1,len(response_follow_after.context['page_obj']))
-
-
-
-
-
-
+        follow_client.get(reverse("posts:profile_follow", args=[self.user]))
+        response_follow = follow_client.get(reverse("posts:follow_index"))
+        response_unfollow = unfollow_client.get(reverse("posts:follow_index"))
+        follow_before = len(response_follow.context["page_obj"])
+        unfollow_before = len(response_unfollow.context["page_obj"])
+        Post.objects.create(author=self.user, text="text")
+        response_follow_after = follow_client.get(reverse("posts:follow_index"))
+        response_unfollow_after = unfollow_client.get(reverse("posts:follow_index"))
+        self.assertEqual(
+            unfollow_before, len(response_unfollow_after.context["page_obj"])
+        )
+        self.assertEqual(
+            follow_before + 1, len(response_follow_after.context["page_obj"])
+        )
