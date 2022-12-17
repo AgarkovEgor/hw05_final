@@ -16,7 +16,8 @@ def paginator_func(post_list, request):
 def index(request):
     template = "posts/index.html"
     post_list = Post.objects.all()
-    context = {"page_obj": paginator_func(post_list, request=request), "index": True}
+    context = {"page_obj": paginator_func(post_list, request=request),
+               "index": True}
     return render(request, template, context)
 
 
@@ -76,7 +77,8 @@ def post_edit(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     if request.user != post.author:
         return redirect("posts:post_detail", post.id)
-    form = PostForm(request.POST or None, files=request.FILES or None, instance=post)
+    form = PostForm(request.POST or None, files=request.FILES or None,
+                    instance=post)
     if form.is_valid():
         form.save()
         return redirect("posts:post_detail", post.id)
@@ -103,7 +105,8 @@ def follow_index(request):
     post_list = Post.objects.filter(
         author__following__user=request.user,
     ).all()
-    context = {"page_obj": paginator_func(post_list, request=request), "follow": True}
+    context = {"page_obj": paginator_func(post_list, request=request),
+               "follow": True}
     return render(request, template, context)
 
 

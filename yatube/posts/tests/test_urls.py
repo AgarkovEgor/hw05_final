@@ -14,7 +14,9 @@ class StaticURLTests(TestCase):
         cls.user = User.objects.create_user(username="egor")
         cls.user2 = User.objects.create_user(username="egor1")
         cls.group = Group.objects.create(
-            title="Тестовая группа", slug="test-slug", description="Тестовое описание"
+            title="Тестовая группа",
+            slug="test-slug",
+            description="Тестовое описание"
         )
         cls.post = Post.objects.create(
             author=cls.user, text="Тестовый пост", group=cls.group

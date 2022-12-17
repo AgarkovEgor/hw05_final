@@ -23,7 +23,9 @@ class PostPagesTests(TestCase):
         cls.user = User.objects.create_user(username="egor2")
         # Создадим запись в БД
         cls.group = Group.objects.create(
-            title="Тестовая группа", slug="test-slug", description="Тестовое описание"
+            title="Тестовая группа",
+            slug="test-slug",
+            description="Тестовое описание"
         )
         small_gif = (
             b"\x47\x49\x46\x38\x39\x61\x02\x00"
@@ -37,7 +39,8 @@ class PostPagesTests(TestCase):
             name="small.gif", content=small_gif, content_type="image/gif"
         )
         cls.post = Post.objects.create(
-            author=cls.user, text="Тестовый пост", group=cls.group, image=uploaded
+            author=cls.user, text="Тестовый пост", group=cls.group,
+            image=uploaded
         )
         cls.templates_pages_names = {
             reverse("posts:index"): "posts/index.html",
@@ -79,7 +82,8 @@ class PostPagesTests(TestCase):
             )
             # 9 постов автора1 с группой group , 4 поста автора2 без группы
             objs = [
-                Post(author=cls.author, text=f"Тестовый текст {i}", group=cls.group)
+                Post(author=cls.author, text=f"Тестовый текст {i}",
+                     group=cls.group)
                 for i in range(13)
             ]
             Post.objects.bulk_create(objs)
@@ -261,7 +265,7 @@ class PostPagesTests(TestCase):
         """Тест подписки"""
         author_to_follow = User.objects.create_user(username="test_user")
         before = Follow.objects.count()
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse("posts:profile_follow", args=[author_to_follow])
         )
         self.assertEqual(before, Follow.objects.count() - 1)
@@ -274,7 +278,7 @@ class PostPagesTests(TestCase):
         author_to_follow = User.objects.create_user(username="test_user")
         Follow.objects.create(author=author_to_follow, user=self.user)
         before = Follow.objects.count()
-        response = self.authorized_client.get(
+        self.authorized_client.get(
             reverse("posts:profile_unfollow", args=[author_to_follow])
         )
         self.assertEqual(before, Follow.objects.count() + 1)
@@ -293,8 +297,10 @@ class PostPagesTests(TestCase):
         follow_before = len(response_follow.context["page_obj"])
         unfollow_before = len(response_unfollow.context["page_obj"])
         Post.objects.create(author=self.user, text="text")
-        response_follow_after = follow_client.get(reverse("posts:follow_index"))
-        response_unfollow_after = unfollow_client.get(reverse("posts:follow_index"))
+        response_follow_after = follow_client.get(reverse(
+            "posts:follow_index"))
+        response_unfollow_after = unfollow_client.get(reverse(
+            "posts:follow_index"))
         self.assertEqual(
             unfollow_before, len(response_unfollow_after.context["page_obj"])
         )
