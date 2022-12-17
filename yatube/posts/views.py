@@ -5,9 +5,11 @@ from django.core.paginator import Paginator
 from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 
+PAGINATOR_COUNT = 10
+
 
 def paginator_func(post_list, request):
-    paginator = Paginator(post_list, 10)
+    paginator = Paginator(post_list, PAGINATOR_COUNT)
     page_number = request.GET.get("page")
     return paginator.get_page(page_number)
 
