@@ -2,29 +2,36 @@
 {% block title %}Последние обновления на сайте{% endblock %}
 {% block content %}
      {% include 'posts/includes/switcher.html' %}
-    {% load thumbnail %}
       <div class="container py-5">
         <h1>{{ post.title}}</h1>
         {% for post in page_obj %}
         <article>
           <ul>
             <li>
-              Автор: {{post.author.get_full_name}}
+             Автор: {{post.author.get_full_name}}
+              <a href="{% url 'posts:profile' post.author.username %}">
+                 все посты пользователя
+                </a>
             </li>
             <li>
-              Дата публикации: {{post.pub_date|date:"d E Y"}}
+             Дата публикации: {{post.pub_date|date:"d E Y"}}
             </li>
           </ul>
-          {% thumbnail post.image "860x339" crop="center" upscale=True as im %}
-          <img class="card-img my-2" src="{{ im.url }}">
-          {% endthumbnail %}
+          {% if post.image %}
+          <img class="img-thumbnail" src="{{ post.image.url }}" alt="Card image cap" width="900" height="335" align="top" crop="center"/>
+          {% endif %}
           <p>
-            {{post.text|linebreaksbr}}
-          </p>
+            {{post.text}}
+            <br>
+          <a href="{% url 'posts:post_detail' post.id %}">подробная информация</a></p>
           {% if post.group %}
-            <a href="{% url 'posts:group_posts' post.group.slug %}">все записи группы</a>
+          <p>
+              Группа: {{post.group.title}}
+              <br>
+          <a href="{% url 'posts:group_posts' post.group.slug %}">все записи группы</a></p>
           {% endif %}
         </article>
+        <hr>
         {% endfor %}
         {% include 'posts/includes/paginator.html' %}
       </div>
